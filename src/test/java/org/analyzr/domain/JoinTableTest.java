@@ -26,7 +26,7 @@ public class JoinTableTest {
                 "SELECT prd.id AS prd_id, prd.category AS prd_category, prd.name AS prd_name, prc.price AS prc_price"
                         + " FROM product AS prd"
                         + " JOIN price AS prc ON prd.id = prc.product_id",
-                productPrice.getRetrieveQuery()
+                productPrice.getJoinedQuery()
         );
     }
 }

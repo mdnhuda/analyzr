@@ -17,10 +17,10 @@ public class DbTableColumn {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     public enum Type {
-        VARCHAR,
+        BOOLEAN,
         INTEGER,
         DATE,
-        BOOLEAN;
+        VARCHAR;
 
         public boolean hasLength() {
             return this == VARCHAR;

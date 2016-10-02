@@ -57,7 +57,7 @@ public class DbTableTest {
         String[] rawInsertValues = new String[] {"1001", "Food", "Nachos", "2016-09-30", "Yes"};
         assertEquals("Should match insert query",
                 "INSERT INTO product VALUES (?, ?, ?, ?, ?)",
-                table.getInsertQuery(rawInsertValues));
+                table.getInsertQuery());
 
         assertArrayEquals("Should match insert params",
                 new Object[] {1001, "Food", "Nachos", dateTime.toDate(), true},

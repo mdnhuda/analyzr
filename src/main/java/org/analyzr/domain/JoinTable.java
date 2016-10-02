@@ -12,6 +12,7 @@ public class JoinTable {
     private String tableName;
     private String alias;
     private List<DbTableColumn> columns;
+
     private DbTable primary;
     private DbTable secondary;
     private JoinColumnPair joinColumnPair;
@@ -38,7 +39,7 @@ public class JoinTable {
         });
     }
 
-    public String getRetrieveQuery() {
+    public String getJoinedQuery() {
         return "SELECT "
                 + columns.stream()
                 .map(col -> col.getTable().getAlias() + "." + col.getName() + " AS " + col.getQueryAlias())

@@ -75,6 +75,12 @@ public class DbTable {
                 + " FROM " + tableName + " AS " + alias;
     }
 
+    public String getInsertQuery() {
+        Preconditions.checkArgument(columns != null && columns.size() > 0, "Table must have at least one column!");
+        return "INSERT INTO " + tableName + " VALUES ("
+                + IntStream.range(0, columns.size()).mapToObj(i -> "?").collect(Collectors.joining(", "))
+                + ")";
+    }
     public String getInsertQuery(String ...params) {
         Preconditions.checkArgument(columns != null && columns.size() > 0, "Table must have at least one column!");
         Preconditions.checkArgument(columns.size() == params.length,
