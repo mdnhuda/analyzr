@@ -8,14 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.util.ResourceUtils;
 
 import javax.sql.DataSource;
 
@@ -126,8 +124,8 @@ public class StorageServiceTest {
 
     @Test
     public void testPopulateTable() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:sample_table_data.csv");
-        DbTable table = storageService.populateTable(resource.getFile());
+        Resource resource = resourceLoader.getResource("classpath:Sample Table Data.csv");
+        DbTable table = storageService.populateTableSchema(resource.getFile());
         assertEquals("Table name should be file_name without extension",
                 "sample_table_data", table.getTableName());
         assertEquals("Table should have 5 columns", 5, table.getColumns().size());
@@ -142,9 +140,8 @@ public class StorageServiceTest {
         assertEquals("created_datetime column should be of type varchar", DbTableColumn.Type.DATE,
                 table.getColumns().get(4).getType());
 
+        storageService.populateTableData(table, resource.getFile());
         assertEquals(Long.valueOf(2L),
                 jdbcTemplate.queryForObject("SELECT count(1) FROM sample_table_data", new Object[]{}, Long.class));
-
-
     }
 }

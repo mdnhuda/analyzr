@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by naimulhuda on 2/10/2016.
+ * @author nhuda
+ * @since 2/10/16
  */
 public class DataTypeUtils {
     private static final List<String> BOOLEAN_VARIANTS = Arrays.asList("0", "1", "true", "false", "yes", "no");
