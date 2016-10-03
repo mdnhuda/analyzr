@@ -35,7 +35,7 @@ public class DbTableTest {
     @Test
     public void testDropTableQuery() throws Exception {
         DbTable table = new DbTable("product");
-        assertEquals("Should match", "DROP TABLE product", table.getDropTableQuery());
+        assertEquals("Should match", "DROP TABLE IF EXISTS product CASCADE", table.getDropTableQuery());
     }
 
     @Test

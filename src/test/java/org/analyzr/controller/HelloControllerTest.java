@@ -1,6 +1,7 @@
 package org.analyzr.controller;
 
 
+import org.analyzr.config.DaoConfig;
 import org.analyzr.config.RootConfig;
 import org.analyzr.config.ServletConfig;
 import org.junit.Before;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @WebAppConfiguration
 @ContextConfiguration(classes = {
         RootConfig.class,
+        DaoConfig.class,
         ServletConfig.class})
 public class HelloControllerTest {
 

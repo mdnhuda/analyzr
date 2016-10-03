@@ -3,6 +3,7 @@ package org.analyzr.service;
 import com.google.common.collect.Lists;
 import org.analyzr.domain.DbTable;
 import org.analyzr.domain.DbTableColumn;
+import org.analyzr.exception.StorageException;
 import org.analyzr.utils.DataTypeUtils;
 import org.analyzr.utils.DateUtils;
 import org.apache.commons.csv.CSVFormat;
@@ -16,6 +17,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -34,6 +36,8 @@ import java.util.*;
 public class StorageService {
     private static final Logger log = LoggerFactory.getLogger(StorageService.class);
 
+    private static final String TMP_DIR = "/tmp/upload";
+
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -47,6 +51,40 @@ public class StorageService {
 
     public void insert(DbTable table, String... params) {
         jdbcTemplate.update(table.getInsertQuery(), table.getInsertParams(params));
+    }
+
+    public long count(DbTable table) {
+        return jdbcTemplate.queryForObject(table.getCountQuery(), Long.class);
+    }
+
+    public DbTable processUploadedFile(MultipartFile multipartFile) {
+        File tmpDir = new File(TMP_DIR);
+        boolean tmpDirCreated = tmpDir.mkdir();
+        log.debug("Tmp Directory created ? {}", tmpDirCreated);
+
+        File tempFile = null;
+
+        try {
+            try {
+                tempFile = new File(tmpDir, multipartFile.getOriginalFilename());
+                multipartFile.transferTo(tempFile);
+            } catch (IOException e) {
+                log.error("Error while creating temporary file", e);
+                throw new StorageException("Error while creating temporary file", e);
+            }
+
+            DbTable table = populateTableSchema(tempFile);
+
+            int count = populateTableData(table, tempFile);
+            log.debug("inserted {} records in table={}", count, table.getTableName());
+
+            return table;
+
+        } finally {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
+        }
     }
 
     public DbTable populateTableSchema(File csvFile) {
@@ -93,10 +131,16 @@ public class StorageService {
 
         create(table);
 
+        try {
+            csvParser.close();
+        } catch (IOException e) {
+            log.error("Error closing Csv Parser", e);
+        }
+
         return table;
     }
 
-    public void populateTableData(DbTable table, File csvFile) {
+    public int populateTableData(DbTable table, File csvFile) {
         CSVParser csvParser;
         try {
             csvParser = CSVParser.parse(csvFile, Charset.defaultCharset(), CSVFormat.DEFAULT.withHeader());
@@ -104,14 +148,23 @@ public class StorageService {
             throw new RuntimeException("Could not parse csv file", e);
         }
 
-        csvParser.iterator().forEachRemaining(record -> {
+        int count = 0;
+        for (CSVRecord record : csvParser) {
             try {
                 List<String> paramList = Lists.newArrayList(record.iterator());
                 insert(table, paramList.toArray(new String[paramList.size()]));
+                count++;
             } catch (Exception e) {
                 log.error("Could not insert record number={}", csvParser.getCurrentLineNumber());
             }
-        });
+        }
+
+        try {
+            csvParser.close();
+        } catch (IOException e) {
+            log.error("Error closing Csv Parser", e);
+        }
+        return count;
     }
 
     public void drop(DbTable table) {

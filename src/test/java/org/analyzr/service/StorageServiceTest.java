@@ -1,7 +1,10 @@
-package org.analyzr.domain;
+package org.analyzr.service;
 
 import org.analyzr.config.DaoConfig;
 import org.analyzr.config.RootConfig;
+import org.analyzr.domain.DbTable;
+import org.analyzr.domain.DbTableColumn;
+import org.analyzr.domain.JoinTable;
 import org.analyzr.service.StorageService;
 import org.junit.After;
 import org.junit.Before;
@@ -58,6 +61,9 @@ public class StorageServiceTest {
         secondTable.addColumn(new DbTableColumn("product_id", DbTableColumn.Type.INTEGER).withUnique(true).withNullable(false));
         secondTable.addColumn(new DbTableColumn("price", DbTableColumn.Type.INTEGER));
 
+        storageService.drop(table);
+        storageService.drop(secondTable);
+
         storageService.create(table);
         storageService.create(secondTable);
 
@@ -72,14 +78,12 @@ public class StorageServiceTest {
 
     @After
     public void clean() {
-        storageService.drop(table);
-        storageService.drop(secondTable);
     }
 
     @Test
     public void testTableOperations() throws Exception {
 
-        assertEquals(Long.valueOf(2L),
+        assertEquals(Long.valueOf(3L),
                 jdbcTemplate.queryForObject("SELECT count(1) FROM product", new Object[]{}, Long.class));
 
         storageService.delete(table);
@@ -125,6 +129,7 @@ public class StorageServiceTest {
     @Test
     public void testPopulateTable() throws Exception {
         Resource resource = resourceLoader.getResource("classpath:Sample Table Data.csv");
+
         DbTable table = storageService.populateTableSchema(resource.getFile());
         assertEquals("Table name should be file_name without extension",
                 "sample_table_data", table.getTableName());
@@ -143,5 +148,7 @@ public class StorageServiceTest {
         storageService.populateTableData(table, resource.getFile());
         assertEquals(Long.valueOf(2L),
                 jdbcTemplate.queryForObject("SELECT count(1) FROM sample_table_data", new Object[]{}, Long.class));
+
+        storageService.drop(table);
     }
 }

@@ -60,7 +60,7 @@ public class DbTable {
     }
 
     public String getDropTableQuery() {
-        return "DROP TABLE " + tableName;
+        return "DROP TABLE IF EXISTS " + tableName + " CASCADE";
     }
 
     public String getCleanTableQuery() {
@@ -73,6 +73,10 @@ public class DbTable {
                 .map(col -> alias + "." + col.getName() + " AS " + col.getQueryAlias())
                 .collect(Collectors.joining(", "))
                 + " FROM " + tableName + " AS " + alias;
+    }
+
+    public String getCountQuery() {
+        return "SELECT count(1) FROM " + tableName;
     }
 
     public String getInsertQuery() {
